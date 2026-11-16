@@ -1,11 +1,11 @@
 package model;
 
 import exception.IngressoInvalidoException;
-import interfaces.Validavel;
+import interfaces.Promocional;
 
 import java.time.LocalDateTime;
 
-public abstract class Ingresso implements Comparable<Ingresso>, Validavel {
+public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     protected int codigo;
     protected String nomeComprador;
@@ -15,24 +15,24 @@ public abstract class Ingresso implements Comparable<Ingresso>, Validavel {
     protected LocalDateTime dataHoraBaixa;
 
     public abstract double calcularValorFinal();
-    public void validarNaPortaria(Ingresso ingresso) {
-        if (ingresso.getStatus() == StatusIngresso.UTILIZADO) {
+    public void validarNaPortaria() {
+        if (this.getStatus() == StatusIngresso.UTILIZADO) {
             throw new IngressoInvalidoException("Este ingresso já foi utilizado previamente");
-        } else if (ingresso.getStatus() == StatusIngresso.CANCELADO) {
+        } else if (this.getStatus() == StatusIngresso.CANCELADO) {
             throw new IngressoInvalidoException("Este ingresso foi cancelado!");
-        } else if (ingresso.getStatus() == StatusIngresso.DISPONIVEL) {
-            ingresso.setStatus(StatusIngresso.UTILIZADO);
-            ingresso.setDataHoraBaixa(LocalDateTime.now());
+        } else if (this.getStatus() == StatusIngresso.DISPONIVEL) {
+            this.setStatus(StatusIngresso.UTILIZADO);
+            this.setDataHoraBaixa(LocalDateTime.now());
         }
     }
 
-    public void cancelarIngresso(Ingresso ingresso) {
-        if (ingresso.getStatus() == StatusIngresso.DISPONIVEL) {
-            ingresso.setStatus(StatusIngresso.CANCELADO);
-            ingresso.setDataHoraBaixa(LocalDateTime.now());
-        } else if (ingresso.getStatus() == StatusIngresso.UTILIZADO) {
+    public void cancelarIngresso() {
+        if (this.getStatus() == StatusIngresso.DISPONIVEL) {
+            this.setStatus(StatusIngresso.CANCELADO);
+            this.setDataHoraBaixa(LocalDateTime.now());
+        } else if (this.getStatus() == StatusIngresso.UTILIZADO) {
             throw new IngressoInvalidoException("Esse ingresso já foi utilizado");
-        } else if (ingresso.getStatus() == StatusIngresso.CANCELADO) {
+        } else if (this.getStatus() == StatusIngresso.CANCELADO) {
             throw new IngressoInvalidoException("Esse ingresso já foi cancelado previamente");
         }
     }

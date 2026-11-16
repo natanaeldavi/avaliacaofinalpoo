@@ -17,7 +17,7 @@ public class IngressoInteira extends Ingresso {
     }
 
     @Override
-    public String formatarStatus(String StatusIngresso) {
-        return "";
+    public boolean aplicaCupom(String codigoCupom) {
+        return false;
     }
 }
