@@ -1,11 +1,11 @@
 package interfaces;
 
 import exception.IngressoInvalidoException;
-import model.StatusIngresso;
+import model.Ingresso;
 
 public interface Validavel {
 
-    public void validarNaPortaria() throws IngressoInvalidoException;
-    public String formatarStatuis(String StatusIngresso);
+    public void validarNaPortaria(Ingresso ingresso) throws IngressoInvalidoException;
+    public String formatarStatus(String StatusIngresso);
 
 }

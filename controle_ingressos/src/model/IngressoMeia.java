@@ -22,4 +22,9 @@ public class IngressoMeia extends Ingresso {
     public String toString() {
         return super.toString();
     }
+
+    @Override
+    public String formatarStatus(String StatusIngresso) {
+        return "";
+    }
 }

@@ -1,8 +1,11 @@
 package model;
 
+import exception.IngressoInvalidoException;
+import interfaces.Validavel;
+
 import java.time.LocalDateTime;
 
-public abstract class Ingresso implements Comparable<Ingresso> {
+public abstract class Ingresso implements Comparable<Ingresso>, Validavel {
 
     protected int codigo;
     protected String nomeComprador;
@@ -12,18 +15,34 @@ public abstract class Ingresso implements Comparable<Ingresso> {
     protected LocalDateTime dataHoraBaixa;
 
     public abstract double calcularValorFinal();
-    public void validarNaPortaria() {
-
+    public void validarNaPortaria(Ingresso ingresso) {
+        if (ingresso.getStatus() == StatusIngresso.UTILIZADO) {
+            throw new IngressoInvalidoException("Este ingresso já foi utilizado previamente");
+        } else if (ingresso.getStatus() == StatusIngresso.CANCELADO) {
+            throw new IngressoInvalidoException("Este ingresso foi cancelado!");
+        } else if (ingresso.getStatus() == StatusIngresso.DISPONIVEL) {
+            ingresso.setStatus(StatusIngresso.UTILIZADO);
+            ingresso.setDataHoraBaixa(LocalDateTime.now());
+        }
     }
 
-    public void cancelarIngresso() {
-
+    public void cancelarIngresso(Ingresso ingresso) {
+        if (ingresso.getStatus() == StatusIngresso.DISPONIVEL) {
+            ingresso.setStatus(StatusIngresso.CANCELADO);
+            ingresso.setDataHoraBaixa(LocalDateTime.now());
+        } else if (ingresso.getStatus() == StatusIngresso.UTILIZADO) {
+            throw new IngressoInvalidoException("Esse ingresso já foi utilizado");
+        } else if (ingresso.getStatus() == StatusIngresso.CANCELADO) {
+            throw new IngressoInvalidoException("Esse ingresso já foi cancelado previamente");
+        }
     }
 
     public Ingresso(int codigo, String nomeComprador, double valorBase) {
         this.codigo = codigo;
         this.nomeComprador = nomeComprador;
         this.valorBase = valorBase;
+        this.status = StatusIngresso.DISPONIVEL;
+        this.dataHoraCompra = LocalDateTime.now();
     }
 
     public int getCodigo() {
@@ -64,17 +83,18 @@ public abstract class Ingresso implements Comparable<Ingresso> {
 
     @Override
     public int compareTo(Ingresso o) {
-        return 0;
+        return Integer.compare(this.codigo, o.getCodigo());
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
+    public boolean equals(Object o) {
+        if(!(o instanceof Ingresso ingresso)) return false;
+        return this.codigo == ingresso.getCodigo();
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return codigo;
     }
 
     @Override
