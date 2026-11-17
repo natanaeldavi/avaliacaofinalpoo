@@ -14,7 +14,7 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
     protected LocalDateTime dataHoraCompra;
     protected LocalDateTime dataHoraBaixa;
 
-    public abstract double calcularValorFinal();
+    public abstract double calcularValorFinal() throws IngressoInvalidoException;
     public void validarIngresso() {
         if (this.getStatus() == StatusIngresso.UTILIZADO) {
             throw new IngressoInvalidoException("Este ingresso já foi utilizado previamente");
@@ -26,7 +26,7 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
         }
     }
 
-    public void cancelarIngresso() {
+    public void cancelarIngresso() throws IngressoInvalidoException {
         if (this.getStatus() == StatusIngresso.DISPONIVEL) {
             this.setStatus(StatusIngresso.CANCELADO);
             this.setDataHoraBaixa(LocalDateTime.now());

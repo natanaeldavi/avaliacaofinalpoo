@@ -1,7 +1,6 @@
 package model;
 
 import exception.CupomInvalidoException;
-import exception.IngressoInvalidoException;
 
 public class IngressoMeia extends Ingresso {
 
