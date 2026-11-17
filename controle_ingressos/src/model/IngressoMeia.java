@@ -1,5 +1,8 @@
 package model;
 
+import exception.CupomInvalidoException;
+import exception.IngressoInvalidoException;
+
 public class IngressoMeia extends Ingresso {
 
     private int numeroCarteirinha;
@@ -24,7 +27,7 @@ public class IngressoMeia extends Ingresso {
     }
 
     @Override
-    public boolean aplicaCupom(String codigoCupom) {
-        return false;
+    public double aplicaCupom(String codigoCupom) throws CupomInvalidoException {
+        throw new CupomInvalidoException("Cupons promocionais não são cumulativos para ingressos com meia-entrada");
     }
 }

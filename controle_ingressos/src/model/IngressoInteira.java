@@ -1,5 +1,9 @@
 package model;
 
+import exception.CupomInvalidoException;
+import exception.IngressoInvalidoException;
+import interfaces.Promocional;
+
 public class IngressoInteira extends Ingresso {
 
     public IngressoInteira(int codigo, String nomeComprador, double valorBase) {
@@ -17,7 +21,11 @@ public class IngressoInteira extends Ingresso {
     }
 
     @Override
-    public boolean aplicaCupom(String codigoCupom) {
-        return false;
+    public double aplicaCupom(String codigoCupom) throws CupomInvalidoException {
+        if(Promocional.verificaCupom(codigoCupom)) {
+            return calcularValorFinal() - (calcularValorFinal() * (Promocional.cuponsValidos.get(codigoCupom)));
+        } else {
+            throw new CupomInvalidoException("Ingresso inválido/inexistente");
+        }
     }
 }
