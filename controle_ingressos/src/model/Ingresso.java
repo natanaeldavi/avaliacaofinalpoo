@@ -13,6 +13,7 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
     protected StatusIngresso status;
     protected LocalDateTime dataHoraCompra;
     protected LocalDateTime dataHoraBaixa;
+    private static int contadorCodigo = 1;
 
     public abstract double calcularValorFinal() throws IngressoInvalidoException;
     public void validarIngresso() {
@@ -37,8 +38,9 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
         }
     }
 
-    public Ingresso(int codigo, String nomeComprador, double valorBase) {
-        this.codigo = codigo;
+    public Ingresso(String nomeComprador, double valorBase) {
+        this.codigo = contadorCodigo;
+        contadorCodigo++;
         this.nomeComprador = nomeComprador;
         this.valorBase = valorBase;
         this.status = StatusIngresso.DISPONIVEL;

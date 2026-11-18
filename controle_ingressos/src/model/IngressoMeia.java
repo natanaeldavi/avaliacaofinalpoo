@@ -6,8 +6,8 @@ public class IngressoMeia extends Ingresso {
 
     private int numeroCarteirinha;
 
-    public IngressoMeia(int codigo, String nomeComprador, double valorBase, int numeroCarteirinha) {
-        super(codigo, nomeComprador, valorBase);
+    public IngressoMeia(String nomeComprador, double valorBase, int numeroCarteirinha) {
+        super(nomeComprador, valorBase);
         this.numeroCarteirinha = numeroCarteirinha;
     }
 
