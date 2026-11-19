@@ -8,9 +8,12 @@ import java.time.LocalDateTime;
 public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     protected int codigo;
+    protected String nomeFilme;
     protected String nomeComprador;
     protected double valorBase;
     protected StatusIngresso status;
+    protected boolean possuiCupom;
+    protected double percentualCupom;
     protected LocalDateTime dataHoraCompra;
     protected LocalDateTime dataHoraBaixa;
     private static int contadorCodigo = 1;
@@ -38,9 +41,10 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
         }
     }
 
-    public Ingresso(String nomeComprador, double valorBase) {
+    public Ingresso(String nomeFilme, String nomeComprador, double valorBase) {
         this.codigo = contadorCodigo;
         contadorCodigo++;
+        this.nomeFilme = nomeFilme;
         this.nomeComprador = nomeComprador;
         this.valorBase = valorBase;
         this.status = StatusIngresso.DISPONIVEL;
@@ -101,6 +105,6 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Cód: " + codigo + " | Filme: " + nomeFilme + " | Cliente: " + nomeComprador + " | Valor: " + String.format("R$ %.2f", calcularValorFinal()) + " | Status: " + status;
     }
 }
