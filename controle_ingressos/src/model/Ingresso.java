@@ -55,6 +55,10 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
         return codigo;
     }
 
+    public String getNomeFilme() {
+        return nomeFilme;
+    }
+
     public String getNomeComprador() {
         return nomeComprador;
     }
@@ -65,6 +69,10 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     public StatusIngresso getStatus() {
         return status;
+    }
+
+    public void setNomeFilme(String nomeFilme) {
+        this.nomeFilme = nomeFilme;
     }
 
     public void setStatus(StatusIngresso status) {
