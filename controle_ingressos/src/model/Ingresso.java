@@ -1,14 +1,16 @@
 package model;
 
 import exception.IngressoInvalidoException;
+import exception.SessaoInvalidaException;
 import interfaces.Promocional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     protected int codigo;
-    protected String nomeFilme;
+    protected SessaoCinema sessao;
     protected String nomeComprador;
     protected double valorBase;
     protected StatusIngresso status;
@@ -34,6 +36,7 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
         if (this.getStatus() == StatusIngresso.DISPONIVEL) {
             this.setStatus(StatusIngresso.CANCELADO);
             this.setDataHoraBaixa(LocalDateTime.now());
+            this.sessao.liberarVaga(this);
         } else if (this.getStatus() == StatusIngresso.UTILIZADO) {
             throw new IngressoInvalidoException("Esse ingresso já foi utilizado");
         } else if (this.getStatus() == StatusIngresso.CANCELADO) {
@@ -41,22 +44,23 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
         }
     }
 
-    public Ingresso(String nomeFilme, String nomeComprador, double valorBase) {
+    public Ingresso(SessaoCinema sessao, String nomeComprador) throws SessaoInvalidaException {
+        sessao.adicionarIngressoSessao(this);
         this.codigo = contadorCodigo;
         contadorCodigo++;
-        this.nomeFilme = nomeFilme;
+        this.sessao = sessao;
         this.nomeComprador = nomeComprador;
-        this.valorBase = valorBase;
+        this.valorBase = sessao.getFilmeSessao().getValorIngresso();
         this.status = StatusIngresso.DISPONIVEL;
         this.dataHoraCompra = LocalDateTime.now();
     }
 
-    public int getCodigo() {
-        return codigo;
+    public SessaoCinema getSessao() {
+        return sessao;
     }
 
-    public String getNomeFilme() {
-        return nomeFilme;
+    public int getCodigo() {
+        return codigo;
     }
 
     public String getNomeComprador() {
@@ -69,10 +73,6 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     public StatusIngresso getStatus() {
         return status;
-    }
-
-    public void setNomeFilme(String nomeFilme) {
-        this.nomeFilme = nomeFilme;
     }
 
     public void setStatus(StatusIngresso status) {
@@ -113,6 +113,6 @@ public abstract class Ingresso implements Comparable<Ingresso>, Promocional {
 
     @Override
     public String toString() {
-        return "Cód: " + codigo + " | Filme: " + nomeFilme + " | Cliente: " + nomeComprador + " | Valor: " + String.format("R$ %.2f", calcularValorFinal()) + " | Status: " + status;
+        return "Cód: " + codigo + " | Filme: " + sessao.getFilmeSessao().getNomeFilme() + " | Cliente: " + nomeComprador + " | Valor: " + String.format("R$ %.2f", calcularValorFinal()) + " | Status: " + status;
     }
 }

@@ -5,19 +5,21 @@ import java.util.Objects;
 public class Filme {
 
     protected int idFilme;
-    private int contatorIdFilme = 1;
+    private static int contatorIdFilme = 1;
     protected String nomeFilme;
     protected String classificacaoEtaria;
     protected String descricaoFilme;
     protected double notaMedia;
+    protected double valorIngresso;
 
-    public Filme(String nomeFilme, String classificacaoEtaria, String descricaoFilme, double notaMedia) {
+    public Filme(String nomeFilme, String classificacaoEtaria, String descricaoFilme, double notaMedia, double valorIngresso) {
         idFilme = contatorIdFilme;
         contatorIdFilme++;
         this.nomeFilme = nomeFilme;
         this.classificacaoEtaria = classificacaoEtaria;
         this.descricaoFilme = descricaoFilme;
         this.notaMedia = notaMedia;
+        this.valorIngresso = valorIngresso;
     }
 
     public int getIdFilme() {
@@ -34,6 +36,10 @@ public class Filme {
 
     public String getClassificacaoEtaria() {
         return classificacaoEtaria;
+    }
+
+    public double getValorIngresso() {
+        return valorIngresso;
     }
 
     public void setClassificacaoEtaria(String classificacaoEtaria) {

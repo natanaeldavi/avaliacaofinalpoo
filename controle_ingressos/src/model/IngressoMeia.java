@@ -6,8 +6,8 @@ public class IngressoMeia extends Ingresso {
 
     private int numeroCarteirinha;
 
-    public IngressoMeia(String nomeFilme,String nomeComprador, double valorBase, int numeroCarteirinha) {
-        super(nomeFilme, nomeComprador, valorBase);
+    public IngressoMeia(SessaoCinema sessao,String nomeComprador, int numeroCarteirinha) {
+        super(sessao, nomeComprador);
         this.numeroCarteirinha = numeroCarteirinha;
     }
 

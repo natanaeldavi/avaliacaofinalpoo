@@ -5,8 +5,8 @@ import interfaces.Promocional;
 
 public class IngressoInteira extends Ingresso {
 
-    public IngressoInteira(String nomeFilme, String nomeComprador, double valorBase) {
-        super(nomeFilme, nomeComprador, valorBase);
+    public IngressoInteira(SessaoCinema sessao, String nomeComprador) {
+        super(sessao, nomeComprador);
     }
 
     @Override

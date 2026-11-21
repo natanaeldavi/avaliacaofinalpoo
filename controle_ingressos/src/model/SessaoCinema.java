@@ -1,6 +1,11 @@
 package model;
 
+import exception.IngressoInvalidoException;
+import exception.SessaoInvalidaException;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SessaoCinema {
 
@@ -8,17 +13,18 @@ public class SessaoCinema {
     protected LocalDateTime dataHoraSessao;
     protected Filme filmeSessao;
     protected int vagasSessao;
-    protected boolean isDisponivel;
+    protected int vagasDisponiveis;
+    protected List<Ingresso> listIngressosSessao = new ArrayList<>();
     protected String salaSessao;
     private static int contadorIdSessao = 1;
 
-    public SessaoCinema(LocalDateTime dataHoraSessao, Filme filmeSessao, int vagasSessao, boolean isDisponivel, String salaSessao) {
+    public SessaoCinema(LocalDateTime dataHoraSessao, Filme filmeSessao, int vagasSessao, String salaSessao) {
         idSessao = contadorIdSessao;
         contadorIdSessao++;
         this.dataHoraSessao = dataHoraSessao;
         this.filmeSessao = filmeSessao;
         this.vagasSessao = vagasSessao;
-        this.isDisponivel = isDisponivel;
+        this.vagasDisponiveis = vagasSessao;
         this.salaSessao = salaSessao;
     }
 
@@ -26,12 +32,56 @@ public class SessaoCinema {
         return idSessao;
     }
 
+    public boolean adicionarIngressoSessao(Ingresso i) throws SessaoInvalidaException {
+        if (!(vagasDisponiveis <= 0)) {
+            listIngressosSessao.add(i);
+            vagasDisponiveis--;
+            return true;
+        } else {
+            throw new SessaoInvalidaException("Vagas para essa sessão esgotadas");
+        }
+    }
+
+    public boolean liberarVaga(Ingresso i) throws IngressoInvalidoException {
+        if (listIngressosSessao.contains(i)) {
+            vagasDisponiveis++;
+            listIngressosSessao.remove(i);
+            return true;
+        } else {
+            throw new IngressoInvalidoException("Ingresso inexistente / inválido");
+        }
+    }
+
     public LocalDateTime getDataHoraSessao() {
         return dataHoraSessao;
     }
 
+    public int getVagasDisponiveis() {
+        return vagasDisponiveis;
+    }
+
+    public int getVagasSessao() {
+        return vagasSessao;
+    }
+
+    public List<Ingresso> getListIngressosSessao() {
+        return List.copyOf(listIngressosSessao);
+    }
+
+    public String getSalaSessao() {
+        return salaSessao;
+    }
+
     public void setDataHoraSessao(LocalDateTime dataHoraSessao) {
         this.dataHoraSessao = dataHoraSessao;
+    }
+
+    public Filme getFilmeSessao() {
+        return filmeSessao;
+    }
+
+    public List<Ingresso> getIngressosSessao() {
+        return List.copyOf(listIngressosSessao);
     }
 
     @Override
