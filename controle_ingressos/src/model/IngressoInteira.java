@@ -1,11 +1,12 @@
 package model;
 
 import exception.CupomInvalidoException;
+import exception.SessaoInvalidaException;
 import interfaces.Promocional;
 
 public class IngressoInteira extends Ingresso {
 
-    public IngressoInteira(SessaoCinema sessao, String nomeComprador) {
+    public IngressoInteira(SessaoCinema sessao, String nomeComprador) throws SessaoInvalidaException {
         super(sessao, nomeComprador);
     }
 

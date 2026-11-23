@@ -1,12 +1,13 @@
 package model;
 
 import exception.CupomInvalidoException;
+import exception.SessaoInvalidaException;
 
 public class IngressoMeia extends Ingresso {
 
     private int numeroCarteirinha;
 
-    public IngressoMeia(SessaoCinema sessao,String nomeComprador, int numeroCarteirinha) {
+    public IngressoMeia(SessaoCinema sessao,String nomeComprador, int numeroCarteirinha) throws SessaoInvalidaException {
         super(sessao, nomeComprador);
         this.numeroCarteirinha = numeroCarteirinha;
     }

@@ -525,6 +525,8 @@ public class TelaControle extends JFrame {
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Digite um número válido para a carteirinha!");
+        } catch (SessaoInvalidaException e) {
+            throw new RuntimeException(e);
         }
     }
 
