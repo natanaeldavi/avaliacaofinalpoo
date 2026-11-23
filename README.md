@@ -19,6 +19,8 @@ Aplicação desktop desenvolvida em **Java** com interface gráfica em **Java Sw
 
 ```text
 src/
+├── app/
+│   └── Principal.java               # Ponto de entrada da aplicação
 ├── controller/
 │   └── GerenciadorIngressos.java    # Regras de negócio, buscas e cálculos via Streams
 ├── exception/
@@ -35,18 +37,17 @@ src/
 │   ├── IngressoMeia.java
 │   ├── SessaoCinema.java
 │   └── StatusIngresso.java          # Enum (DISPONIVEL, UTILIZADO, CANCELADO)
-├── view/
-│   └── TelaControle.java            # Interface gráfica Swing em abas (JTabbedPane)
-└── Main.java                        # Ponto de entrada da aplicação
+└── view/
+   └── TelaControle.java            # Interface gráfica Swing em abas (JTabbedPane)           
 ```
 
 ## Como Executar
 
 1. Certifique-se de ter o **JDK 17** (ou superior) instalado.
-2. Compile e execute a classe `Main.java` pela sua IDE (IntelliJ IDEA, Eclipse ou VS Code) ou via terminal:
+2. Compile e execute a classe `Principal.java` pela sua IDE (IntelliJ IDEA, Eclipse ou VS Code) ou via terminal:
    ```bash
-   javac -d out src/**/*.java src/*.java
-   java -cp out Main
+   javac -d out src/*/*.java
+   java -cp out app.Principal
    ```
 
 ## Transparência no Uso de IA Generativa
