@@ -2,10 +2,14 @@ package view;
 
 import controller.GerenciadorIngressos;
 import exception.CupomInvalidoException;
+import exception.FilmeInvalidoException;
 import exception.IngressoInvalidoException;
+import exception.SessaoInvalidaException;
+import model.Filme;
 import model.Ingresso;
 import model.IngressoInteira;
 import model.IngressoMeia;
+import model.SessaoCinema;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,20 +17,42 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class TelaControle extends JFrame {
 
     private final GerenciadorIngressos gerenciador;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    private JTextField txtNomeComprador;
+    // Aba 1: Filmes
     private JTextField txtNomeFilme;
-    private JTextField txtValorBase;
+    private JTextField txtClassificacao;
+    private JTextField txtDescricaoFilme;
+    private JTextField txtNotaMedia;
+    private JTextField txtValorIngressoFilme;
+    private JButton btnCadastrarFilme;
+    private JTable tabelaFilmes;
+    private DefaultTableModel modeloTabelaFilmes;
+
+    // Aba 2: Sessões
+    private JComboBox<Filme> cmbFilmeSessao;
+    private JTextField txtDataHoraSessao;
+    private JTextField txtSalaSessao;
+    private JTextField txtVagasSessao;
+    private JButton btnCadastrarSessao;
+    private JTable tabelaSessoes;
+    private DefaultTableModel modeloTabelaSessoes;
+
+    // Aba 3: Bilheteria e Portaria
+    private JComboBox<SessaoCinema> cmbSessaoIngresso;
+    private JTextField txtNomeComprador;
     private JComboBox<String> cmbTipoIngresso;
     private JTextField txtCarteirinha;
     private JButton btnComprar;
-
     private JTable tabelaIngressos;
-    private DefaultTableModel modeloTabela;
+    private DefaultTableModel modeloTabelaIngressos;
 
     private JTextField txtCodigoAcao;
     private JTextField txtCupom;
@@ -44,21 +70,36 @@ public class TelaControle extends JFrame {
     }
 
     private void configurarJanela() {
-        setTitle("Controle de Ingressos");
-        setSize(850, 620);
-        setMinimumSize(new Dimension(780, 560));
+        setTitle("Sistema de Gestão de Cinema - Bilheteria e Sessões");
+        setSize(920, 660);
+        setMinimumSize(new Dimension(840, 600));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(243, 245, 248));
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(12, 12, 12, 12));
     }
 
     private void inicializarComponentes() {
-        JPanel painelSuperior = new JPanel(new GridBagLayout());
-        painelSuperior.setBackground(Color.WHITE);
-        painelSuperior.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(208, 215, 222)), "Novo Ingresso",
+        JTabbedPane abas = new JTabbedPane();
+        abas.setFont(new Font("SansSerif", Font.BOLD, 13));
+        abas.setBorder(new EmptyBorder(8, 8, 8, 8));
+
+        abas.addTab("1. Filmes", criarPainelFilmes());
+        abas.addTab("2. Sessões", criarPainelSessoes());
+        abas.addTab("3. Bilheteria & Portaria", criarPainelBilheteria());
+
+        add(abas, BorderLayout.CENTER);
+    }
+
+    private JPanel criarPainelFilmes() {
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBackground(new Color(243, 245, 248));
+        painel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(208, 215, 222)), "Cadastrar Novo Filme",
                 TitledBorder.LEFT, TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 13), new Color(31, 35, 40)
         ));
 
@@ -67,78 +108,201 @@ public class TelaControle extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridy = 0;
-        gbc.weightx = 0.30;
-        gbc.gridx = 0; painelSuperior.add(new JLabel("Nome do Comprador"), gbc);
-        gbc.weightx = 0.25;
-        gbc.gridx = 1; painelSuperior.add(new JLabel("Filme"), gbc);
-        gbc.weightx = 0.22;
-        gbc.gridx = 2; painelSuperior.add(new JLabel("Tipo de Ingresso"), gbc);
-        gbc.weightx = 0.23;
-        gbc.gridx = 3; painelSuperior.add(new JLabel("ID Estudante (Carteirinha)"), gbc);
+        gbc.gridx = 0; gbc.weightx = 0.35; form.add(new JLabel("Nome do Filme"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.20; form.add(new JLabel("Classificação"), gbc);
+        gbc.gridx = 2; gbc.weightx = 0.20; form.add(new JLabel("Nota Média (0-10)"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.25; form.add(new JLabel("Valor do Ingresso (R$)"), gbc);
 
         gbc.gridy = 1;
-        txtNomeComprador = new JTextField();
         txtNomeFilme = new JTextField();
-        cmbTipoIngresso = new JComboBox<>(new String[]{"Inteira", "Meia-Entrada"});
-        txtCarteirinha = new JTextField();
-        txtCarteirinha.setEnabled(false);
+        txtClassificacao = new JTextField();
+        txtNotaMedia = new JTextField();
+        txtValorIngressoFilme = new JTextField();
 
-        gbc.gridx = 0; painelSuperior.add(txtNomeComprador, gbc);
-        gbc.gridx = 1; painelSuperior.add(txtNomeFilme, gbc);
-        gbc.gridx = 2; painelSuperior.add(cmbTipoIngresso, gbc);
-        gbc.gridx = 3; painelSuperior.add(txtCarteirinha, gbc);
+        gbc.gridx = 0; form.add(txtNomeFilme, gbc);
+        gbc.gridx = 1; form.add(txtClassificacao, gbc);
+        gbc.gridx = 2; form.add(txtNotaMedia, gbc);
+        gbc.gridx = 3; form.add(txtValorIngressoFilme, gbc);
 
         gbc.gridy = 2;
-        gbc.gridx = 0; painelSuperior.add(new JLabel("Preço Base (R$)"), gbc);
+        gbc.gridx = 0; gbc.gridwidth = 3; form.add(new JLabel("Descrição / Sinopse"), gbc);
+        gbc.gridwidth = 1;
 
         gbc.gridy = 3;
-        txtValorBase = new JTextField();
-        gbc.gridx = 0; painelSuperior.add(txtValorBase, gbc);
+        txtDescricaoFilme = new JTextField();
+        gbc.gridx = 0; gbc.gridwidth = 3; form.add(txtDescricaoFilme, gbc);
+        gbc.gridwidth = 1;
 
-        btnComprar = new JButton("Comprar Ingresso");
-        estilizarBotao(btnComprar, new Color(29, 99, 184), Color.WHITE);
-        gbc.gridx = 3; painelSuperior.add(btnComprar, gbc);
+        btnCadastrarFilme = new JButton("Cadastrar Filme");
+        estilizarBotao(btnCadastrarFilme, new Color(29, 99, 184), Color.WHITE);
+        gbc.gridx = 3; form.add(btnCadastrarFilme, gbc);
 
-        add(painelSuperior, BorderLayout.NORTH);
+        painel.add(form, BorderLayout.NORTH);
 
-        String[] colunas = {"Código", "Filme", "Comprador", "Tipo", "Preço Final", "Status"};
-        modeloTabela = new DefaultTableModel(colunas, 0) {
+        String[] colunas = {"ID", "Filme", "Classificação", "Nota", "Valor Base", "Descrição", "Faturamento"};
+        modeloTabelaFilmes = new DefaultTableModel(colunas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
-        tabelaIngressos = new JTable(modeloTabela);
-        tabelaIngressos.setRowHeight(28);
-        tabelaIngressos.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
-        tabelaIngressos.getTableHeader().setBackground(new Color(234, 238, 242));
-        tabelaIngressos.getTableHeader().setForeground(new Color(31, 35, 40));
-        tabelaIngressos.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        tabelaIngressos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabelaIngressos.setGridColor(new Color(225, 228, 232));
+        tabelaFilmes = new JTable(modeloTabelaFilmes);
+        configurarEstiloTabela(tabelaFilmes);
+        tabelaFilmes.getColumnModel().getColumn(0).setPreferredWidth(45);
+        tabelaFilmes.getColumnModel().getColumn(1).setPreferredWidth(180);
+        tabelaFilmes.getColumnModel().getColumn(2).setPreferredWidth(90);
+        tabelaFilmes.getColumnModel().getColumn(3).setPreferredWidth(60);
+        tabelaFilmes.getColumnModel().getColumn(4).setPreferredWidth(95);
+        tabelaFilmes.getColumnModel().getColumn(5).setPreferredWidth(230);
+        tabelaFilmes.getColumnModel().getColumn(6).setPreferredWidth(110);
 
+        JScrollPane scroll = new JScrollPane(tabelaFilmes);
+        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(208, 215, 222)));
+        painel.add(scroll, BorderLayout.CENTER);
+
+        return painel;
+    }
+
+    private JPanel criarPainelSessoes() {
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBackground(new Color(243, 245, 248));
+        painel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(208, 215, 222)), "Agendar Nova Sessão",
+                TitledBorder.LEFT, TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 13), new Color(31, 35, 40)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 6, 4, 6);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridy = 0;
+        gbc.gridx = 0; gbc.weightx = 0.35; form.add(new JLabel("Filme em Cartaz"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.25; form.add(new JLabel("Data e Hora (dd/MM/yyyy HH:mm)"), gbc);
+        gbc.gridx = 2; gbc.weightx = 0.20; form.add(new JLabel("Sala"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.20; form.add(new JLabel("Total de Vagas"), gbc);
+
+        gbc.gridy = 1;
+        cmbFilmeSessao = new JComboBox<>();
+        txtDataHoraSessao = new JTextField(LocalDateTime.now().plusHours(2).format(formatter));
+        txtSalaSessao = new JTextField();
+        txtVagasSessao = new JTextField();
+
+        gbc.gridx = 0; form.add(cmbFilmeSessao, gbc);
+        gbc.gridx = 1; form.add(txtDataHoraSessao, gbc);
+        gbc.gridx = 2; form.add(txtSalaSessao, gbc);
+        gbc.gridx = 3; form.add(txtVagasSessao, gbc);
+
+        gbc.gridy = 2;
+        btnCadastrarSessao = new JButton("Criar Sessão");
+        estilizarBotao(btnCadastrarSessao, new Color(29, 99, 184), Color.WHITE);
+        gbc.gridx = 3; form.add(btnCadastrarSessao, gbc);
+
+        painel.add(form, BorderLayout.NORTH);
+
+        String[] colunas = {"ID", "Filme", "Data / Hora", "Sala", "Vagas Disponíveis", "Lotação Total"};
+        modeloTabelaSessoes = new DefaultTableModel(colunas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        tabelaSessoes = new JTable(modeloTabelaSessoes);
+        configurarEstiloTabela(tabelaSessoes);
+        tabelaSessoes.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tabelaSessoes.getColumnModel().getColumn(1).setPreferredWidth(220);
+        tabelaSessoes.getColumnModel().getColumn(2).setPreferredWidth(150);
+        tabelaSessoes.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tabelaSessoes.getColumnModel().getColumn(4).setPreferredWidth(130);
+        tabelaSessoes.getColumnModel().getColumn(5).setPreferredWidth(110);
+
+        JScrollPane scroll = new JScrollPane(tabelaSessoes);
+        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(208, 215, 222)));
+        painel.add(scroll, BorderLayout.CENTER);
+
+        return painel;
+    }
+
+    private JPanel criarPainelBilheteria() {
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBackground(new Color(243, 245, 248));
+        painel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JPanel painelSuperior = new JPanel(new GridBagLayout());
+        painelSuperior.setBackground(Color.WHITE);
+        painelSuperior.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(208, 215, 222)), "Emitir Novo Ingresso",
+                TitledBorder.LEFT, TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 13), new Color(31, 35, 40)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 6, 4, 6);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridy = 0;
+        gbc.gridx = 0; gbc.weightx = 0.40; painelSuperior.add(new JLabel("Selecione a Sessão"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.25; painelSuperior.add(new JLabel("Nome do Comprador"), gbc);
+        gbc.gridx = 2; gbc.weightx = 0.17; painelSuperior.add(new JLabel("Tipo de Ingresso"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.18; painelSuperior.add(new JLabel("ID Estudante"), gbc);
+
+        gbc.gridy = 1;
+        cmbSessaoIngresso = new JComboBox<>();
+        cmbSessaoIngresso.setRenderer(new SessaoComboRenderer());
+        txtNomeComprador = new JTextField();
+        cmbTipoIngresso = new JComboBox<>(new String[]{"Inteira", "Meia-Entrada"});
+        txtCarteirinha = new JTextField();
+        txtCarteirinha.setEnabled(false);
+
+        gbc.gridx = 0; painelSuperior.add(cmbSessaoIngresso, gbc);
+        gbc.gridx = 1; painelSuperior.add(txtNomeComprador, gbc);
+        gbc.gridx = 2; painelSuperior.add(cmbTipoIngresso, gbc);
+        gbc.gridx = 3; painelSuperior.add(txtCarteirinha, gbc);
+
+        gbc.gridy = 2;
+        btnComprar = new JButton("Comprar Ingresso");
+        estilizarBotao(btnComprar, new Color(29, 99, 184), Color.WHITE);
+        gbc.gridx = 3; painelSuperior.add(btnComprar, gbc);
+
+        painel.add(painelSuperior, BorderLayout.NORTH);
+
+        String[] colunas = {"Código", "Sessão / Filme", "Comprador", "Tipo", "Preço Final", "Status"};
+        modeloTabelaIngressos = new DefaultTableModel(colunas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        tabelaIngressos = new JTable(modeloTabelaIngressos);
+        configurarEstiloTabela(tabelaIngressos);
         tabelaIngressos.getColumnModel().getColumn(5).setCellRenderer(new StatusBadgeRenderer());
 
         tabelaIngressos.getColumnModel().getColumn(0).setPreferredWidth(60);
-        tabelaIngressos.getColumnModel().getColumn(1).setPreferredWidth(180);
-        tabelaIngressos.getColumnModel().getColumn(2).setPreferredWidth(180);
-        tabelaIngressos.getColumnModel().getColumn(3).setPreferredWidth(110);
+        tabelaIngressos.getColumnModel().getColumn(1).setPreferredWidth(230);
+        tabelaIngressos.getColumnModel().getColumn(2).setPreferredWidth(170);
+        tabelaIngressos.getColumnModel().getColumn(3).setPreferredWidth(120);
         tabelaIngressos.getColumnModel().getColumn(4).setPreferredWidth(100);
         tabelaIngressos.getColumnModel().getColumn(5).setPreferredWidth(110);
 
         JScrollPane scrollTabela = new JScrollPane(tabelaIngressos);
         scrollTabela.getViewport().setBackground(Color.WHITE);
         scrollTabela.setBorder(BorderFactory.createLineBorder(new Color(208, 215, 222)));
-        add(scrollTabela, BorderLayout.CENTER);
+        painel.add(scrollTabela, BorderLayout.CENTER);
 
-        JPanel painelInferior = new JPanel(new BorderLayout(0, 10));
+        JPanel painelInferior = new JPanel(new BorderLayout(0, 8));
         painelInferior.setOpaque(false);
 
         JPanel painelAcoes = new JPanel(new GridBagLayout());
         painelAcoes.setBackground(Color.WHITE);
         painelAcoes.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(208, 215, 222)), "Ações Rápidas",
+                BorderFactory.createLineBorder(new Color(208, 215, 222)), "Ações Rápidas (Portaria e Cupons)",
                 TitledBorder.LEFT, TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 13), new Color(31, 35, 40)
         ));
 
@@ -182,10 +346,21 @@ public class TelaControle extends JFrame {
         lblReceitaTotal = new JLabel("Receita Total: R$ 0,00", SwingConstants.CENTER);
         lblReceitaTotal.setFont(new Font("SansSerif", Font.BOLD, 18));
         lblReceitaTotal.setForeground(new Color(31, 35, 40));
-        lblReceitaTotal.setBorder(new EmptyBorder(4, 0, 4, 0));
+        lblReceitaTotal.setBorder(new EmptyBorder(4, 0, 2, 0));
         painelInferior.add(lblReceitaTotal, BorderLayout.SOUTH);
 
-        add(painelInferior, BorderLayout.SOUTH);
+        painel.add(painelInferior, BorderLayout.SOUTH);
+        return painel;
+    }
+
+    private void configurarEstiloTabela(JTable tabela) {
+        tabela.setRowHeight(28);
+        tabela.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+        tabela.getTableHeader().setBackground(new Color(234, 238, 242));
+        tabela.getTableHeader().setForeground(new Color(31, 35, 40));
+        tabela.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tabela.setGridColor(new Color(225, 228, 232));
     }
 
     private void estilizarBotao(JButton botao, Color corFundo, Color corTexto) {
@@ -201,6 +376,9 @@ public class TelaControle extends JFrame {
     }
 
     private void configurarEventos() {
+        btnCadastrarFilme.addActionListener(e -> realizarCadastroFilme());
+        btnCadastrarSessao.addActionListener(e -> realizarCadastroSessao());
+
         cmbTipoIngresso.addActionListener(e -> {
             boolean isMeia = "Meia-Entrada".equals(cmbTipoIngresso.getSelectedItem());
             txtCarteirinha.setEnabled(isMeia);
@@ -212,7 +390,7 @@ public class TelaControle extends JFrame {
         tabelaIngressos.getSelectionModel().addListSelectionListener(e -> {
             int linhaSelecionada = tabelaIngressos.getSelectedRow();
             if (linhaSelecionada != -1) {
-                Object codigo = modeloTabela.getValueAt(linhaSelecionada, 0);
+                Object codigo = modeloTabelaIngressos.getValueAt(linhaSelecionada, 0);
                 txtCodigoAcao.setText(codigo.toString());
             }
         });
@@ -223,126 +401,53 @@ public class TelaControle extends JFrame {
         btnAplicarCupom.addActionListener(e -> executarAplicacaoCupom());
     }
 
+    // =========================================================================
+    // IMPLEMENTAÇÃO DOS MÉTODOS DE LÓGICA E INTEGRAÇÃO
+    // =========================================================================
+
+    private void realizarCadastroFilme() {
+        // TODO 1: Implementar cadastro de Filme
+    }
+
+    private void realizarCadastroSessao() {
+        // TODO 2: Implementar cadastro de SessaoCinema
+    }
+
     private void realizarCompra() {
-        try {
-            String comprador = txtNomeComprador.getText().trim();
-            String filme = txtNomeFilme.getText().trim();
-            String valorTexto = txtValorBase.getText().trim().replace(",", ".");
-
-            if (comprador.isEmpty() || filme.isEmpty() || valorTexto.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Preencha comprador, filme e preço base.", "Campos Obrigatórios", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            double valorBase = Double.parseDouble(valorTexto);
-            if (valorBase <= 0) {
-                JOptionPane.showMessageDialog(this, "O preço base deve ser maior que zero.", "Valor Inválido", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            Ingresso novoIngresso;
-            if ("Meia-Entrada".equals(cmbTipoIngresso.getSelectedItem())) {
-                String carteirinhaTexto = txtCarteirinha.getText().trim();
-                if (carteirinhaTexto.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Informe o número da carteirinha para meia-entrada.", "Campo Obrigatório", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                int numeroCarteirinha = Integer.parseInt(carteirinhaTexto);
-                novoIngresso = new IngressoMeia(comprador, filme, valorBase, numeroCarteirinha);
-            } else {
-                novoIngresso = new IngressoInteira(comprador, filme, valorBase);
-            }
-
-            gerenciador.cadastrarIngresso(novoIngresso);
-            limparCamposCompra();
-            atualizarTela();
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Verifique os valores numéricos (Preço Base ou Carteirinha).", "Erro de Formatação", JOptionPane.ERROR_MESSAGE);
-        }
+        // TODO 3: Implementar compra de Ingresso (Inteira ou Meia)
     }
 
     private void executarValidacao() {
-        try {
-            int codigo = lerCodigoAcao();
-            gerenciador.processarValidacao(codigo);
-            atualizarTela();
-            JOptionPane.showMessageDialog(this, "Ingresso #" + codigo + " validado com sucesso!", "Entrada Liberada", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Digite um código numérico válido.", "Código Inválido", JOptionPane.WARNING_MESSAGE);
-        } catch (IngressoInvalidoException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Operação Não Permitida", JOptionPane.WARNING_MESSAGE);
-        }
+        // TODO 4: Implementar validação de entrada na portaria
     }
 
     private void executarCancelamento() {
-        try {
-            int codigo = lerCodigoAcao();
-            gerenciador.solicitarCancelamento(codigo);
-            atualizarTela();
-            JOptionPane.showMessageDialog(this, "Ingresso #" + codigo + " cancelado.", "Cancelamento Concluído", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Digite um código numérico válido.", "Código Inválido", JOptionPane.WARNING_MESSAGE);
-        } catch (IngressoInvalidoException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Operação Não Permitida", JOptionPane.WARNING_MESSAGE);
-        }
+        // TODO 5: Implementar cancelamento de ingresso
     }
 
     private void executarAplicacaoCupom() {
-        try {
-            int codigo = lerCodigoAcao();
-            String cupom = txtCupom.getText().trim();
-            if (cupom.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Digite o código do cupom.", "Campo Vazio", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            gerenciador.validarCupom(codigo, cupom);
-            txtCupom.setText("");
-            atualizarTela();
-            JOptionPane.showMessageDialog(this, "Cupom aplicado com sucesso ao ingresso #" + codigo + "!", "Desconto Aplicado", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Digite um código de ingresso numérico válido.", "Código Inválido", JOptionPane.WARNING_MESSAGE);
-        } catch (IngressoInvalidoException | CupomInvalidoException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Cupom Não Aplicado", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private int lerCodigoAcao() throws NumberFormatException {
-        String texto = txtCodigoAcao.getText().trim();
-        if (texto.isEmpty()) {
-            throw new NumberFormatException("Campo vazio");
-        }
-        return Integer.parseInt(texto);
-    }
-
-    private void limparCamposCompra() {
-        txtNomeComprador.setText("");
-        txtNomeFilme.setText("");
-        txtValorBase.setText("");
-        txtCarteirinha.setText("");
-        cmbTipoIngresso.setSelectedIndex(0);
+        // TODO 6: Implementar aplicação de cupom promocional
     }
 
     private void atualizarTela() {
-        modeloTabela.setRowCount(0);
-        for (Ingresso i : gerenciador.listaIngressos) {
-            String tipo = (i instanceof IngressoMeia)
-                    ? "Meia (" + ((IngressoMeia) i).getNumeroCarteirinha() + ")"
-                    : "Inteira";
+        // TODO 7: Atualizar ComboBoxes, JTables (Filmes, Sessões, Ingressos) e lblReceitaTotal
+    }
 
-            modeloTabela.addRow(new Object[]{
-                    i.getCodigo(),
-                    i.getNomeFilme(),
-                    i.getNomeComprador(),
-                    tipo,
-                    String.format("R$ %.2f", i.calcularValorFinal()),
-                    i.getStatus().name()
-            });
+    private class SessaoComboRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof SessaoCinema s) {
+                label.setText(String.format("Sessão #%d - %s | %s | Sala %s | R$ %.2f (%d vagas)",
+                        s.getIdSessao(),
+                        s.getFilmeSessao().getNomeFilme(),
+                        s.getDataHoraSessao().format(formatter),
+                        s.getSalaSessao(),
+                        s.getFilmeSessao().getValorIngresso(),
+                        s.getVagasDisponiveis()));
+            }
+            return label;
         }
-
-        lblReceitaTotal.setText(String.format("Receita Total: R$ %.2f", gerenciador.calcularFaturamentoTotal()));
     }
 
     private static class StatusBadgeRenderer extends DefaultTableCellRenderer {
