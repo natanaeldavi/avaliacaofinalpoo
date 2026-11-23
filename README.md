@@ -37,16 +37,16 @@ src/
 │   └── StatusIngresso.java          # Enum (DISPONIVEL, UTILIZADO, CANCELADO)
 ├── view/
 │   └── TelaControle.java            # Interface gráfica Swing em abas (JTabbedPane)
-└── Main.java                        # Ponto de entrada da aplicação
+└── Principal.java                        # Ponto de entrada da aplicação
 ```
 
 ## Como Executar
 
 1. Certifique-se de ter o **JDK 17** (ou superior) instalado.
-2. Compile e execute a classe `Main.java` pela sua IDE (IntelliJ IDEA, Eclipse ou VS Code) ou via terminal:
+2. Compile e execute a classe `Principal.java` pela sua IDE (IntelliJ IDEA, Eclipse ou VS Code) ou via terminal:
    ```bash
    javac -d out src/**/*.java src/*.java
-   java -cp out Main
+   java -cp out Principal
    ```
 
 ## Transparência no Uso de IA Generativa
