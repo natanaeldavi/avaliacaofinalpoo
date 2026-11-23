@@ -15,6 +15,12 @@ Aplicação desktop desenvolvida em **Java** com interface gráfica em **Java Sw
   * Cancelamento de bilhetes disponíveis (`DISPONIVEL` $\rightarrow$ `CANCELADO`), devolvendo automaticamente a vaga para a sessão correspondente.
 * **Relatórios Financeiros em Tempo Real:** Cálculo dinâmico de receita total, receita por filme e receita por sessão encerrada utilizando **Java Streams**.
 
+## Capturas de Tela
+
+| 1. Gestão de Filmes | 2. Gestão de Sessões | 3. Bilheteria & Portaria |
+| :---: | :---: | :---: |
+| <img width="270" alt="Aba Filmes" src="https://github.com/user-attachments/assets/0420b618-e4ca-4ada-b463-9377707f558f" /> | <img width="270" alt="Aba Sessões" src="https://github.com/user-attachments/assets/f77b14e1-de30-46a2-a207-b5d8b0ef688f" /> | <img width="270" alt="Aba Bilheteria" src="https://github.com/user-attachments/assets/5f99aa1e-f586-4581-9695-b8b772a43f8e" /> |
+
 ## Cupons Promocionais para Teste
 
 A aplicação valida os cupons cadastrados na interface `Promocional` (*case-insensitive*, aplicáveis exclusivamente a ingressos do tipo **Inteira** com status `DISPONIVEL`):
