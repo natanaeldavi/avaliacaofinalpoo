@@ -37,10 +37,8 @@ src/
 │   ├── IngressoMeia.java
 │   ├── SessaoCinema.java
 │   └── StatusIngresso.java          # Enum (DISPONIVEL, UTILIZADO, CANCELADO)
-├── view/
-│   └── TelaControle.java
 └── view/
-   └── TelaControle.java           # Interface gráfica Swing em abas (JTabbedPane)
+   └── TelaControle.java            # Interface gráfica Swing em abas (JTabbedPane)           
 ```
 
 ## Como Executar
