@@ -11,6 +11,7 @@ import model.StatusIngresso;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,7 @@ public class GerenciadorIngressos {
     }
 
     public String listarIngressos() {
+        Collections.sort(listaIngressos);
         if (listaIngressos.isEmpty()) {
             return "Nenhum ingresso cadastrado";
         } else {
@@ -70,7 +72,7 @@ public class GerenciadorIngressos {
         return true;
     }
 
-    public Filme buscaFilme(int id) {
+    public Filme buscaFilme(int id) throws FilmeInvalidoException{
         return listaFilmes.stream().filter(f -> f.getIdFilme() == id).findFirst().orElseThrow(() -> new FilmeInvalidoException("Filme inexistente/inválido"));
     }
 
@@ -82,7 +84,7 @@ public class GerenciadorIngressos {
         }
     }
 
-    public double calcularFaturamentoTotalFilme(int id) {
+    public double calcularFaturamentoTotalFilme(int id) throws FilmeInvalidoException {
         Filme filme = buscaFilme(id);
         return listaIngressos.stream()
                 .filter(i -> i.getSessao().getFilmeSessao().getIdFilme() == id)
@@ -109,7 +111,7 @@ public class GerenciadorIngressos {
         }
     }
 
-    public SessaoCinema buscaSessao(int id) {
+    public SessaoCinema buscaSessao(int id) throws SessaoInvalidaException{
         return listaSessoes.stream().filter(s -> s.getIdSessao() == id).findFirst().orElseThrow(() -> new SessaoInvalidaException("Sessão inválida/inexistente"));
     }
 

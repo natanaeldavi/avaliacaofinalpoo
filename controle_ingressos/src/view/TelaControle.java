@@ -525,8 +525,6 @@ public class TelaControle extends JFrame {
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Digite um número válido para a carteirinha!");
-        } catch (SessaoInvalidaException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage());
         }
     }
 
@@ -582,17 +580,22 @@ public class TelaControle extends JFrame {
     private void atualizarTela() {
         modeloTabelaFilmes.setRowCount(0);
         cmbFilmeSessao.removeAllItems();
-        gerenciador.listaFilmes.forEach(f -> {
+          gerenciador.listaFilmes.forEach(f -> {
             cmbFilmeSessao.addItem(f);
-            modeloTabelaFilmes.addRow(new Object[]{
-                    f.getIdFilme(),
-                    f.getNomeFilme(),
-                    f.getClassificacaoEtaria(),
-                    String.format("%.1f",f.getNotaMedia()),
-                    String.format("R$ %.2f", f.getValorIngresso()),
-                    f.getDescricaoFilme(),
-                    String.format("R$ %.2f", gerenciador.calcularFaturamentoTotalFilme(f.getIdFilme()))
-            });});
+              try {
+                  modeloTabelaFilmes.addRow(new Object[]{
+                          f.getIdFilme(),
+                          f.getNomeFilme(),
+                          f.getClassificacaoEtaria(),
+                          String.format("%.1f",f.getNotaMedia()),
+                          String.format("R$ %.2f", f.getValorIngresso()),
+                          f.getDescricaoFilme(),
+                          String.format("R$ %.2f", gerenciador.calcularFaturamentoTotalFilme(f.getIdFilme()))
+                  });
+              } catch (FilmeInvalidoException ex) {
+                  JOptionPane.showMessageDialog(this, ex.getMessage());
+              }
+          });
 
         modeloTabelaSessoes.setRowCount(0);
         cmbSessaoIngresso.removeAllItems();
