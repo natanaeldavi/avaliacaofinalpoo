@@ -11,6 +11,7 @@ import model.IngressoInteira;
 import model.IngressoMeia;
 import model.SessaoCinema;
 
+import javax.print.attribute.standard.JobKOctetsProcessed;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -406,31 +407,221 @@ public class TelaControle extends JFrame {
     // =========================================================================
 
     private void realizarCadastroFilme() {
-        // TODO 1: Implementar cadastro de Filme
+
+        String nomeFilme = txtNomeFilme.getText().trim();
+        String classificacaoFilme = txtClassificacao.getText().trim();
+        String descricaoFilme = txtDescricaoFilme.getText().trim();
+        try {
+            Double notaMedia = Double.parseDouble(txtNotaMedia.getText().trim().replace(",", "."));
+            Double valorIngressoFilme = Double.parseDouble(txtValorIngressoFilme.getText().trim().replace(",", "."));
+            if (nomeFilme.isEmpty() ||
+                    classificacaoFilme.isEmpty() ||
+                    descricaoFilme.isEmpty() ||
+                    notaMedia.isNaN() ||
+                    valorIngressoFilme.isNaN()) {
+                JOptionPane.showMessageDialog(this, "Preencha todos os campos para prosseguir!");
+                return;
+            }
+
+            if (valorIngressoFilme <= 0 ) {
+                JOptionPane.showMessageDialog(this, "Valor do ingresso incorreto!");
+                return;
+            }
+            if (notaMedia > 10) {
+                JOptionPane.showMessageDialog(this, "Nota acima do valor maximo!");
+                return;
+            }
+            if (notaMedia < 0) {
+                JOptionPane.showMessageDialog(this, "Nota abaixo do valor minimo!");
+                return;
+            }
+
+            Filme filme = new Filme(nomeFilme, classificacaoFilme, descricaoFilme, notaMedia, valorIngressoFilme);
+
+            gerenciador.cadastrarFilme(filme);
+            txtNomeFilme.setText("");
+            txtClassificacao.setText("");
+            txtDescricaoFilme.setText("");
+            txtNotaMedia.setText("");
+            txtValorIngressoFilme.setText("");
+
+            atualizarTela();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Informe valores numéricos válidos para nota e valor!");
+        }
+
+
     }
 
     private void realizarCadastroSessao() {
-        // TODO 2: Implementar cadastro de SessaoCinema
+        Filme filme = (Filme) cmbFilmeSessao.getSelectedItem();
+        if (filme == null) {
+            JOptionPane.showMessageDialog(this, "Selecione um filme para continuar!");
+            return;
+        }
+
+        try {
+            String dataHoraString = txtDataHoraSessao.getText().trim();
+            String salaSessao = txtSalaSessao.getText().trim();
+            int vagasSessao = Integer.parseInt(txtVagasSessao.getText().trim());
+
+            if (dataHoraString.isEmpty() || salaSessao.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Preencha todos os campos para prosseguir!");
+                return;
+            }
+
+            if (vagasSessao <= 0) {
+                JOptionPane.showMessageDialog(this, "Número de vagas da sessão inválido/incorreto! Tente novamente");
+                return;
+            }
+
+            LocalDateTime dataHora = LocalDateTime.parse(dataHoraString, formatter);
+            SessaoCinema sessao = new SessaoCinema(dataHora, filme, vagasSessao, salaSessao);
+            gerenciador.cadastrarSessao(sessao);
+
+            txtDataHoraSessao.setText("");
+            txtSalaSessao.setText("");
+            txtVagasSessao.setText("");
+
+            cmbFilmeSessao.setSelectedIndex(0);
+            atualizarTela();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Informe valores numéricos válidos para nota e valor!");
+        } catch (DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Data em branco ou fora do padrão!");
+        }
+
+
     }
 
     private void realizarCompra() {
-        // TODO 3: Implementar compra de Ingresso (Inteira ou Meia)
+        SessaoCinema sessao = (SessaoCinema) cmbSessaoIngresso.getSelectedItem();
+        if (sessao == null) {
+            JOptionPane.showMessageDialog(this, "Selecione uma sessão para continuar!");
+            return;
+        }
+        String comprador = txtNomeComprador.getText().trim();
+        String tipo = (String) cmbTipoIngresso.getSelectedItem();
+
+        if (comprador.isEmpty() || tipo.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Preencha todos os campos para prosseguir!");
+            return;
+        }
+
+        try {
+            if (tipo.equals("Meia-Entrada")) {
+                int carteirinha = Integer.parseInt(txtCarteirinha.getText().trim());
+                Ingresso ingresso = new IngressoMeia(sessao, comprador, carteirinha);
+                gerenciador.cadastrarIngresso(ingresso);
+            } else {
+                Ingresso ingresso = new IngressoInteira(sessao, comprador);
+                gerenciador.cadastrarIngresso(ingresso);
+            }
+
+            txtNomeComprador.setText("");
+            txtCarteirinha.setText("");
+            cmbTipoIngresso.setSelectedIndex(0);
+            atualizarTela();
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Digite um número válido para a carteirinha!");
+        } catch (SessaoInvalidaException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
     }
 
     private void executarValidacao() {
-        // TODO 4: Implementar validação de entrada na portaria
+        try {
+            int codigoIngresso = Integer.parseInt(txtCodigoAcao.getText().trim());
+            gerenciador.processarValidacao(codigoIngresso);
+            JOptionPane.showMessageDialog(this, "Ingresso válidado com sucesso!");
+
+            atualizarTela();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Digite um numero valido para o codigo de ingresso!");
+        } catch (IngressoInvalidoException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
     }
 
     private void executarCancelamento() {
-        // TODO 5: Implementar cancelamento de ingresso
+        try {
+            int codigoIngresso = Integer.parseInt(txtCodigoAcao.getText().trim());
+            gerenciador.solicitarCancelamento(codigoIngresso);
+            JOptionPane.showMessageDialog(this, "Ingresso cancelado com sucesso!");
+
+            atualizarTela();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Digite um numero valido para o codigo de ingresso!");
+        } catch (IngressoInvalidoException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
     }
 
     private void executarAplicacaoCupom() {
-        // TODO 6: Implementar aplicação de cupom promocional
+        try {
+            int codigoIngresso = Integer.parseInt(txtCodigoAcao.getText().trim());
+            String cupom = txtCupom.getText().trim();
+            if (cupom.isEmpty()) { JOptionPane.showMessageDialog(this, "Campo de cupom em branco!"); return; }
+            gerenciador.validarCupom(codigoIngresso, cupom);
+            JOptionPane.showMessageDialog(this, "Cupom aplicado com sucesso!");
+
+            txtCodigoAcao.setText("");
+            txtCupom.setText("");
+            atualizarTela();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Digite um numero valido para o codigo de ingresso!");
+        } catch (IngressoInvalidoException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        } catch (CupomInvalidoException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+
     }
 
     private void atualizarTela() {
-        // TODO 7: Atualizar ComboBoxes, JTables (Filmes, Sessões, Ingressos) e lblReceitaTotal
+        modeloTabelaFilmes.setRowCount(0);
+        cmbFilmeSessao.removeAllItems();
+        gerenciador.listaFilmes.forEach(f -> {
+            cmbFilmeSessao.addItem(f);
+            modeloTabelaFilmes.addRow(new Object[]{
+                    f.getIdFilme(),
+                    f.getNomeFilme(),
+                    f.getClassificacaoEtaria(),
+                    String.format("%.1f",f.getNotaMedia()),
+                    String.format("R$ %.2f", f.getValorIngresso()),
+                    f.getDescricaoFilme(),
+                    String.format("R$ %.2f", gerenciador.calcularFaturamentoTotalFilme(f.getIdFilme()))
+            });});
+
+        modeloTabelaSessoes.setRowCount(0);
+        cmbSessaoIngresso.removeAllItems();
+        gerenciador.listaSessoes.forEach(s -> {
+            cmbSessaoIngresso.addItem(s);
+            modeloTabelaSessoes.addRow(new Object[]{
+                    s.getIdSessao(),
+                    s.getFilmeSessao().getNomeFilme(),
+                    s.getDataHoraSessao().format(formatter),
+                    s.getSalaSessao(),
+                    s.getVagasDisponiveis(),
+                    s.getVagasSessao()
+            });
+        });
+
+        modeloTabelaIngressos.setRowCount(0);
+        gerenciador.listaIngressos.forEach(i -> {
+            String tipo = (i instanceof IngressoMeia meia) ? "Meia (" + meia.getNumeroCarteirinha() + ")" : "Inteira";
+            modeloTabelaIngressos.addRow(new Object[]{
+                    i.getCodigo(),
+                    i.getSessao().getFilmeSessao().getNomeFilme(),
+                    i.getNomeComprador(),
+                    tipo,
+                    String.format("R$ %.2f", i.calcularValorFinal()),
+                    i.getStatus().name()
+            });
+        });
+
+        lblReceitaTotal.setText(String.format("Receita Total: R$ %.2f", gerenciador.calcularFaturamentoTotal()));
     }
 
     private class SessaoComboRenderer extends DefaultListCellRenderer {
